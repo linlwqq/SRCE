@@ -1,0 +1,9 @@
+HWViewController.h
+@property (weak, nonatomic) IBOutlet UILabel *lblHelloWorld;
+- (IBAction)doBtnHide:(id)sender;
+
+HWViewController.m
+- (IBAction)doBtnHide:(id)sender {
+    [lblHelloWorld setHidden:![lblHelloWorld isHidden]];
+    [sender setTitle:[lblHelloWorld isHidden] ? @"Show" : @"Hide" forState:UIControlStateNormal];
+}
