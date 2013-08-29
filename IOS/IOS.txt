@@ -7,3 +7,345 @@ HWViewController.m
     [lblHelloWorld setHidden:![lblHelloWorld isHidden]];
     [sender setTitle:[lblHelloWorld isHidden] ? @"Show" : @"Hide" forState:UIControlStateNormal];
 }
+
+//
+//  HelloWorldViewController.h
+//  D01_HelloWorld
+//
+//  Created by linlw on 13-5-29.
+//  Copyright (c) 2013年 linlw. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface HelloWorldViewController : UIViewController
+-(IBAction)showMessage;
+@end
+
+
+//
+//  HelloWorldViewController.m
+//  D01_HelloWorld
+//
+//  Created by linlw on 13-5-29.
+//  Copyright (c) 2013年 linlw. All rights reserved.
+//
+
+#import "HelloWorldViewController.h"
+
+@interfaceHelloWorldViewController ()
+
+@end
+
+@implementation HelloWorldViewController
+
+- (void)viewDidLoad
+{
+    [superviewDidLoad];
+// Do any additional setup after loading the view, typically from a nib.
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [superdidReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+-(IBAction)showMessage{
+    UIAlertView *helloWorldAlter = [[UIAlertViewalloc] initWithTitle:@"My First App"message:@"Hello World!"delegate:nilcancelButtonTitle:@"OK"otherButtonTitles:nil];
+    [helloWorldAlter show];
+}
+
+@end
+
+
+SimpleTableViewController.h 
+#import <UIKit/UIKit.h>
+@interface SimpleTableViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
+@end
+
+
+SimpleTableViewController.m
+@implementation SimpleTableViewController {
+
+NSArray *tableData; 
+}
+- (void)viewDidLoad{
+[super viewDidLoad];
+// Initialize table data
+tableData = [NSArray arrayWithObjects:@"Egg Benedict",
+@"Mushroom Risotto", @"Full Breakfast", @"Hamburger", @"Ham and Egg Sandwich", @"Creme Brelee", @"White Chocolate Donut", @"Starbucks Coffee", @"Vegetable Curry", @"Instant Noodle with Egg", @"Noodle with BBQ Pork", @"Japanese Noodle with Pork", @"GreenTea", @"Thai Shrimp Cake", @"Angry Birds Cake", @"Ham and Cheese Panini", nil];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView
+numberOfRowsInSection:(NSInteger)section {
+return [tableData count]; }
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+static NSString *simpleTableIdentifier = @"SimpleTableItem";
+UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:simpleTableIdentifier];
+if (cell == nil) {
+cell = [[UITableViewCell alloc]
+initWithStyle:UITableViewCellStyleDefault reuseIdentifier:simpleTableIdentifier];
+}
+cell.textLabel.text = [tableData objectAtIndex:indexPath.row]; 
+cell.imageView.image = [UIImage imageNamed:@"creme_brelee.jpg"];
+return cell;
+}
+
+
+
+T:\ASNPGJK\Sources\IOS\IOS6~1\CH03_C~1\PicDecor\Classes\
+
+MovableImageView.m
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event 
+{
+	[super touchesMoved:touches withEvent:event];
+	
+	float deltaX = [[touches anyObject] locationInView:self].x - [[touches anyObject] previousLocationInView:self].x;
+	float deltaY = [[touches anyObject] locationInView:self].y - [[touches anyObject] previousLocationInView:self].y;
+	self.transform = CGAffineTransformTranslate(self.transform, deltaX, deltaY);
+}
+
+VCImageEditing.m
+-(IBAction)doDecorateBtn:(id)sender;
+{
+	selectingImage = YES;
+	[self presentModalViewController:vcDecorations animated:YES];
+}
+
++ (UIImage*)imageWithImage:(UIImage*)image 
+			  scaledToSize:(CGSize)newSize;
+{
+	UIGraphicsBeginImageContext( newSize );
+	[image drawInRect:CGRectMake(0,0,newSize.width,newSize.height)];
+	UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	return newImage;
+}
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller 
+		  didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
+{
+	[self dismissModalViewControllerAnimated:YES];
+}
+
+-(UIImage *)saveImage:(UIView *)view {
+    CGRect mainRect = [[UIScreen mainScreen] bounds];
+    
+    UIGraphicsBeginImageContext(mainRect.size);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    [[UIColor blackColor] set];
+	
+    CGContextFillRect(context, mainRect);
+    [view.layer renderInContext:context];
+    
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    UIGraphicsEndImageContext();
+	
+    return newImage;
+}
+
+-(IBAction)doEmailBtn:(id)sender;
+{
+	MFMailComposeViewController *mailController = [[MFMailComposeViewController alloc] init];
+	mailController.mailComposeDelegate = self;
+	
+	// hide the toolbar
+	for (UIView *v in [self.view subviews])
+		if ([v isKindOfClass:[UIToolbar class]])
+			[v setHidden:YES];
+	
+	UIImage *i = [self saveImage:self.view];
+
+	// show the toolbar
+	for (UIView *v in [self.view subviews])
+		if ([v isKindOfClass:[UIToolbar class]])
+			[v setHidden:NO];
+			
+	NSData *imageAsData = UIImagePNGRepresentation(i);
+	[mailController addAttachmentData:imageAsData mimeType:@"image/png" fileName:@"PicDecor.png"];
+	[mailController setSubject:@"My PicDecor Image"];
+	
+	[self presentModalViewController:mailController animated:YES];
+    [mailController release];
+
+	
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+	[super viewWillAppear:animated];
+	NSLog(@"image: %@", editImage);
+    
+	if (editImage != nil)
+	{
+		[ivEditingImage setImage:editImage];
+		[self.view sendSubviewToBack:ivEditingImage];
+	}
+	
+	if (selectingImage)
+	{
+		MovableImageView *iv = 
+			[[[MovableImageView alloc] 
+			  initWithImage:[vcDecorations selectedImage]] autorelease];
+		[iv setUserInteractionEnabled:YES];
+		[self.view addSubview:iv];
+	}
+	
+	selectingImage = NO;
+}
+
+VCDecorations.m
+-(IBAction)doImageBtn:(id)sender;
+{
+	[selectedImage release];
+	selectedImage = [[sender backgroundImageForState:UIControlStateNormal] retain];
+	[self dismissModalViewControllerAnimated:YES];
+}
+
+-(IBAction)doCancelBtn:(id)sender;
+{
+	[self dismissModalViewControllerAnimated:YES];
+}
+
+PicDecorViewController.m
+- (UIImage*)imageWithImage:(UIImage*)image 
+			  scaledToSize:(CGSize)newSize;
+{
+	UIGraphicsBeginImageContext( newSize );
+	[image drawInRect:CGRectMake(0,0,newSize.width,newSize.height)];
+	UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	return newImage;
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+	UIImage *i = [info objectForKey:UIImagePickerControllerOriginalImage];
+	NSLog(@"%f %f", [i size].width, [i size].height);
+	if (i.size.width > 320 || i.size.height > 480)
+		i = [self imageWithImage:i scaledToSize:CGSizeMake(320, 480)];
+	[self dismissModalViewControllerAnimated:NO];
+	[vcImageEditing setEditImage:i];
+	[self presentModalViewController:vcImageEditing animated:YES];
+}
+
+-(IBAction)doCameraBtn:(id)sender; 
+{
+	UIImagePickerController *ipController = [[[UIImagePickerController alloc] init] autorelease];
+	if ([[[UIDevice currentDevice] model] 
+		 rangeOfString:@"Sim"].location == NSNotFound) 
+		 [ipController setSourceType:UIImagePickerControllerSourceTypeCamera];
+	[ipController setDelegate:self];
+	[self presentModalViewController:ipController animated:YES];
+}
+
+-(IBAction)doPhotoAlbumBtn:(id)sender; 
+{
+	UIImagePickerController *ipController = [[[UIImagePickerController alloc] init] autorelease];
+	[ipController setDelegate:self];
+	[self presentModalViewController:ipController animated:YES];
+}
+
+-(void)viewDidAppear:(BOOL)animated
+{
+	[super viewDidAppear:animated];
+	
+	if (!startedUp)
+        if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+			[self doPhotoAlbumBtn:nil];
+		
+	startedUp = YES;	
+}
+
+IOS开发从入门到精通 P176
+#if 0
+//创建UILable对象
+UILabel* label = [[UILabel alloc] initWithFrame:self.view.bounds];
+label.text = @"This is a UILabel Demo,";
+label.font = [UIFont fontWithName:@"Arial" size:35];
+label.textColor = [[UIColor yellowColor];
+label.textAligment = UITextAligmentCenter;
+label.backgroundColor = [UIColor blueColor];
+label.bcakBreakMode = UILineBreakModeWordWrap;
+label.numberOfLines = 0;
+CGSize size = [label.text sizeWithFont:label.fontconstrainedToSize:self.view.bounds.size lineBreakMode:label.lineBreakMode];
+CGRect rect = label.frame;
+rect.size.height = size.height;
+label.frame = rect;
+#endif
+
+#if 1
+//自定义控件UILableEx需重写父类,具体实现 UILableEx.h/UILabelEx.m, 见IOS开发从入门到精通 P177
+UILabelEx* label = [[UILabelEx alloc] initWithFrame:self.view.bounds];
+label.text = @"This is a UILabel Demo,";
+label.font = [UIFont fontWithName:@"Arial" size:35];
+label.textColor = [[UIColor yellowColor];
+label.textAligment = UITextAligmentCenter;
+label.backgroundColor = [UIColor blueColor];
+label.bcakBreakMode = UILineBreakModeWordWrap;
+label.numberOfLines = 0;
+label.verticalAligment = VerticalAlignmentTop;
+#endif
+
+[self.view addSubView:label];
+[label release];
+
+IOS开发从入门到精通 P191
+//自定义按键图片
+UIImage *normalImage = [[UIImage imageNamed:@"WhiteButton.png"] stretchableImageWithLeftCapWidth:12.0 topCapHeight:0.0];
+UIImage *pressedImage = [[UIImage imageNamed:@"blueButton.png"] stretchableImageWithLeftCapWidth:12.0 topCapHeight:0.0];
+[self.theButton setBackgroundImage:normalImage forState:UIControlStateNormal];
+[self.theButton setBackgroundImage:pressedImage forState:UIControlStateHighlighted];
+[super viedDidLoad];
+
+IOS开发从入门到精通 P195
+//用占位符替换生成文本
+- (IBAction)createStory:(id)sender {
+    self.theStory.text = [self.theTemplate.text stringByReplacingOccurrencesOfString:@"<place" withString:self.thePlace.text];
+}
+
+IOS开发从入门到精通 P194
+//隐藏键盘代码
+- (IBAction)hideKeyboard:(id)sender {
+    [self.thePlace resignFirstResponder];
+    [self.theNumber resignFirstResponder];
+}
+
+IOS开发从入门到精通 P155
+//实现MSGBOX
+-(IBAction)buttonPressed1{
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" 
+                                             message:@"内容" 
+                                             delegate:self 
+                                             cancelButtonTitle:@"OK" 
+                                             otherButtonTitles:nil];
+    [alert show];
+    [alert release];
+}
+
+-(IBAction)buttonPressed1234{
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" 
+                                             message:@"请选择一个按钮:" 
+                                             delegate:self 
+                                             cancelButtonTitle:@"取消" 
+                                             otherButtonTitles:@"按钮一",@"按钮二",@"按钮三",nil];
+    [alert show];
+    [alert release];
+}
+
+//在clickedButtonAtIndex中检测buttonIndex,以判断第几个按钮,0=取消,1=按钮一,2=按钮二,3=按钮三
+-(void)alterView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger) ButtonIndex{
+    NSString* msg = [[NSString alloc]initWithFormat:@"你按下的第%d个按钮!",buttonIndex];
+    UIAlertView* alert = [[UIAlertView alloc]initWithTitle:@"提示"
+                                             message:msg
+                                             delegate:nil
+                                             cancelButtonTitle:@"确定"
+                                             otherButtonTitles:nil];
+    [alert show];
+    [alert release];
+    [msg release];
+}
